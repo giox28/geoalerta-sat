@@ -70,8 +70,8 @@ def evaluar_riesgo(df, susc):
     
     # --- MODO PRUEBA: Forzar alerta para verificar que el email funciona ---
     # (Borra estas 2 líneas cuando ya esté en producción real)
-    if nivel == 0: 
-        nivel, mensaje = 1, "🟡 PRUEBA DE SISTEMA: Verificando envío de correo"
+   # if nivel == 0: 
+   #     nivel, mensaje = 1, "🟡 PRUEBA DE SISTEMA: Verificando envío de correo"
         
     return nivel, mensaje, dato
 
