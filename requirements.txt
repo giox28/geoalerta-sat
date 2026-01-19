@@ -3,3 +3,7 @@ openmeteo-requests
 requests-cache
 retry-requests
 pytz
+plotly
+streamlit
+folium
+streamlit-folium
