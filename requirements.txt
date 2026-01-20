@@ -7,3 +7,4 @@ plotly
 streamlit
 folium
 streamlit-folium
+earthengine-api
