@@ -1,5 +1,6 @@
 name: GeoAlerta SAT - Ciclo Completo
-
+permissions:
+  contents: write
 on:
   schedule:
     - cron: '0 */6 * * *' # Ejecutar cada 6 horas
