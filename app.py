@@ -15,13 +15,17 @@ st.set_page_config(page_title="GeoAlerta Antioquia", page_icon="🏔️", layout
 URL_PUNTOS = "https://raw.githubusercontent.com/giox28/geoalerta-sat/main/puntos_monitoreo.csv"
 
 # --- 1. CARGA DE PUNTOS ESTRUCTURALES ---
+# Usamos el nombre del archivo directo (Ruta relativa)
+ARCHIVO_PUNTOS = "puntos_monitoreo.csv"
+
 @st.cache_data(ttl=3600)
 def cargar_puntos_base():
     try:
-        df = pd.read_csv(URL_PUNTOS)
+        # Leemos directo del disco (mucho más rápido y sin errores 404)
+        df = pd.read_csv(ARCHIVO_PUNTOS)
         return df
     except Exception as e:
-        st.error(f"Error cargando CSV: {e}")
+        st.error(f"Error cargando CSV local: {e}")
         return pd.DataFrame()
 
 # --- 2. MOTOR METEOROLÓGICO MULTIPUNTO (El cambio clave) ---
