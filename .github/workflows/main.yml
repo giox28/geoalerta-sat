@@ -28,26 +28,21 @@ jobs:
           EE_SECRET_JSON: ${{ secrets.EE_SECRET_JSON }} # Inyectamos la llave aquí
         run: python generador_puntos.py
         
-      - name: 💾 Guardar CSV generado (Blindado)
+      - name: 💾 Guardar CSV generado (Blindado v2)
         run: |
           # 1. Configurar identidad
           git config --global user.name 'GeoAlerta Bot'
           git config --global user.email 'bot@geoalerta.com'
           
-          # 2. Asegurarnos de estar en la rama 'main'
-          git checkout main
+          # 2. GUARDAR CAMBIOS PRIMERO (Esto soluciona el error 128)
+          git add puntos_monitoreo.csv
+          # Si no hay cambios, el script no falla (|| echo)
+          git commit -m "🤖 Actualización automática de puntos críticos" || echo "⚠️ Sin cambios nuevos para guardar"
           
-          # 3. BAJAR CAMBIOS RECIENTES (La clave para evitar el error)
-          # Usamos --rebase para poner nuestros cambios "encima" de los tuyos
+          # 3. SINCRONIZAR (Ahora sí podemos hacer rebase porque ya guardamos)
           git pull origin main --rebase
           
-          # 4. Preparar y guardar el archivo
-          git add puntos_monitoreo.csv
-          
-          # 5. Commit (Solo si hay cambios)
-          git commit -m "🤖 Actualización automática de puntos críticos" || echo "⚠️ Sin cambios nuevos en el riesgo"
-          
-          # 6. Subir (Push)
+          # 4. SUBIR
           git push origin main
           
       - name: 📡 Ejecutar Monitoreo de Alertas (Main)
