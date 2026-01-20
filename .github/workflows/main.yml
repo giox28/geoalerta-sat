@@ -1,0 +1,43 @@
+name: GeoAlerta SAT - Ciclo Completo
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Ejecutar cada 6 horas
+  workflow_dispatch: # Permite ejecutar manualmente con un botón
+
+jobs:
+  run-sat:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Descargar repositorio
+        uses: actions/checkout@v3
+        
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: 📦 Instalar librerías
+        run: |
+          pip install -r requirements.txt
+          
+      - name: 🧠 Generar Puntos Críticos (Re-entrenamiento)
+        env:
+          EE_SECRET_JSON: ${{ secrets.EE_SECRET_JSON }} # Inyectamos la llave aquí
+        run: python generador_puntos.py
+        
+      - name: 💾 Guardar CSV generado (Commit automático)
+        run: |
+          git config --global user.name 'GeoAlerta Bot'
+          git config --global user.email 'bot@geoalerta.com'
+          git add puntos_monitoreo.csv
+          # Solo hacemos commit si hubo cambios en los puntos
+          git commit -m "🤖 Actualización automática de puntos críticos" || echo "Sin cambios en los puntos"
+          git push
+          
+      - name: 📡 Ejecutar Monitoreo de Alertas (Main)
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }} # Tus secretos de correo
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: python main.py
