@@ -1,97 +1,65 @@
-# 🌍 GeoAlerta SAT: Sistema de Alerta Temprana por Deslizamientos
+# 🏔️ GeoAlerta SAT: Sistema de Alerta Temprana (Antioquia)
 
 ![Status](https://img.shields.io/badge/Estado-Operativo-success)
-![Python](https://img.shields.io/badge/Python-3.9-blue)
-![Automated](https://img.shields.io/badge/GitHub-Actions-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
+![Monitoreo](https://img.shields.io/badge/Puntos_Activos-58-red)
+![Area](https://img.shields.io/badge/Zona-Antioquia_COL-blue)
 
-> **GeoAlerta SAT** es un sistema autónomo de monitoreo y alerta temprana que integra Inteligencia Artificial Geoespacial (GeoAI) con telemetría meteorológica en tiempo real para predecir y alertar sobre riesgos de deslizamientos las 24/7.
+> **GeoAlerta SAT** es un sistema autónomo de inteligencia artificial que monitorea en tiempo real el riesgo de deslizamientos en el departamento de Antioquia.
 
----
-
-## 🏗️ Arquitectura del Sistema
-El sistema opera bajo una arquitectura **Serverless de Costo Cero**, utilizando GitHub Actions como orquestador para ejecutar la vigilancia cada 6 horas sin intervención humana.
-
-
-
-### Flujo de Datos (ETL Pipeline):
-1.  **Ingesta Satelital:** Conexión vía API a **Open-Meteo** (Modelos ERA5/IFS) para descargar precipitación y humedad del suelo.
-2.  **Procesamiento Hidrológico:** Cálculo de **Lluvia Antecedente Efectiva** (acumulados de 3 a 15 días) y saturación del suelo.
-3.  **Matriz de Decisión (AI):** Cruce de la amenaza climática dinámica con el mapa de susceptibilidad estática (generado por modelos Stacking RF+XGBoost).
-4.  **Notificación:** Envío de alertas vía **SMTP (Email)** a las autoridades competentes si se superan los umbrales de riesgo.
+🔗 **[VER TABLERO DE CONTROL EN VIVO](https://share.streamlit.io/TU_USUARIO/geoalerta-sat/main/app.py)**
+*(Sustituye el link anterior por el link real de tu app)*
 
 ---
 
-## 🧠 Fundamento Científico
+## 🚨 ¿Cómo funciona?
 
-El sistema se basa en un modelo híbrido de Machine Learning desarrollado y validado para la geografía andina colombiana.
+El sistema opera bajo una arquitectura distribuida de tres fases:
 
-| Componente | Descripción Técnica |
-| :--- | :--- |
-| **Modelo Base** | Stacking Classifier (Random Forest + XGBoost) |
-| **Rendimiento** | **AUC: 0.84** (Validado con curvas ROC y Precision-Recall) |
-| **Variables Clave** | HAND (Hidrología), Rugosidad, Pendiente, Cobertura, Lluvia, Arcillas. |
-| **Validación** | Alineado con el estado del arte 2025 (MDPI/Frontiers) en geomorfología cuantitativa. |
+### 1. Fase de Modelado (Google Earth Engine + Colab)
+Se entrenó un modelo de **Machine Learning (Random Forest)** utilizando:
+* **Base de Datos:** 2,000+ eventos históricos (SGC/NASA/Datos Locales).
+* **Variables:** 16 factores geo-ambientales (Pendiente, Geología, HAND, NDVI, Lluvia, etc.).
+* **Resultado:** Un mapa de susceptibilidad del cual se extrajeron **58 Puntos Centinela** de Riesgo Extremo (>80% probabilidad).
 
----
+### 2. Fase de Vigilancia (GitHub Actions)
+Un robot autónomo (`main.py`) se despierta **cada 6 horas** y:
+1.  Lee las coordenadas de los 58 puntos críticos.
+2.  Consulta la API de **Open-Meteo** para obtener la lluvia acumulada (72h) y humedad del suelo en esos puntos.
+3.  Aplica una **Matriz de Decisión** dinámica.
+4.  Si detecta peligro, envía una alerta vía Email.
 
-## 🚦 Lógica de Alerta (Semáforo)
-
-El sistema evalúa el riesgo en tiempo real mediante la siguiente matriz de decisión:
-
-- **🟢 NIVEL 0 (Normal):** Condiciones estables. Lluvia acumulada < 15mm.
-- **🟡 NIVEL 1 (Preventiva):** Suelo saturado (>40%) o lluvias moderadas en zonas de alta susceptibilidad.
-- **🟠 NIVEL 2 (Naranja):** Lluvia acumulada > 40mm en 72h. Preparación para respuesta.
-- **🔴 NIVEL 3 (Roja):** Escenario crítico. Lluvia extrema (>60mm) + Suelo saturado en zonas inestables. **Evacuación sugerida.**
+### 3. Fase de Visualización (Streamlit)
+Un Dashboard interactivo permite a las autoridades y ciudadanos visualizar:
+* Ubicación de los puntos críticos.
+* Nivel de alerta en tiempo real.
+* Gráficas de precipitación reciente.
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-Este proyecto fue desarrollado utilizando tecnologías Open Source:
-
-* **Lenguaje:** Python 3.9
-* **Librerías:** `pandas`, `openmeteo-requests`, `smtplib`.
-* **Infraestructura:** GitHub Actions (CI/CD Cron Jobs).
-* **Fuente de Datos:** Copernicus (Sentinel-2), NASA (DEM), Open-Meteo.
+| Componente | Tecnología | Función |
+| :--- | :--- | :--- |
+| **Backend AI** | Python, GEE API | Entrenamiento y extracción de características. |
+| **Orquestación** | GitHub Actions | Ejecución programada (Cron Job) Serverless. |
+| **Frontend** | Streamlit, Folium | Visualización interactiva web. |
+| **Datos Clima** | Open-Meteo (ERA5) | Telemetría satelital en tiempo real. |
 
 ---
 
-## 🚀 Instalación y Despliegue Local
+## 📊 Matriz de Alerta
 
-Si deseas clonar este proyecto para tu propia zona de estudio:
+El sistema activa alertas basado en la siguiente lógica combinada:
 
-1.  **Clonar repositorio:**
-    ```bash
-    git clone [https://github.com/TU_USUARIO/geoalerta-sat.git](https://github.com/TU_USUARIO/geoalerta-sat.git)
-    cd geoalerta-sat
-    ```
-
-2.  **Instalar dependencias:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  **Configurar Variables de Entorno:**
-    Crea un archivo `.env` o exporta las variables:
-    ```bash
-    export EMAIL_USER="tu_correo@gmail.com"
-    export EMAIL_PASS="tu_password_de_aplicacion"
-    ```
-
-4.  **Ejecutar:**
-    ```bash
-    python main.py
-    ```
+| Nivel | Color | Criterio (Lluvia 72h + Suelo) | Acción |
+| :--- | :--- | :--- | :--- |
+| **0** | 🟢 Verde | Lluvia < 15mm | Monitoreo Normal |
+| **1** | 🟡 Amarilla | Lluvia > 15mm | Vigilancia Preventiva |
+| **2** | 🟠 Naranja | Lluvia > 40mm | **Alistamiento** |
+| **3** | 🔴 Roja | Lluvia > 60mm + Suelo Saturado | **Evacuación Inmediata** |
 
 ---
 
 ## 👨‍💻 Autor
-
-**Ing. Geólogo Giolmer Losiv Gómez Sánchez**
-*Especialista en Geociencias Computacionales y Machine Learning.*
-
-Desarrollado como parte de la iniciativa de modernización tecnológica para la Gestión del Riesgo de Desastres.
-
----
-*© 2026 GeoAlerta Project. All Rights Reserved.*
+Desarrollado como prototipo de ingeniería para la Gestión del Riesgo de Desastres.
+*© 2026 GeoAlerta Project.*
