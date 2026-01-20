@@ -31,6 +31,7 @@ def cargar_puntos_base():
 # --- 2. MOTOR METEOROLÓGICO MULTIPUNTO (El cambio clave) ---
 @st.cache_data(ttl=3600)
 def obtener_clima_dinamico(df_puntos):
+    df_puntos = df_puntos.copy()  # Trabajamos sobre una copia, no el original
     # Configuración API
     cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
@@ -148,7 +149,11 @@ if not df_base.empty:
             ).add_to(m)
         
         # ⭐ EL TRUCO: st_folium devuelve el objeto clicado
-        mapa_output = st_folium(m, height=450, use_container_width=True)
+        mapa_output = st_folium(m, 
+                                height=450, 
+                                use_container_width=True, 
+                                returned_objects=["last_object_clicked"]
+                               )
 
     # --- PROCESAR CLIC ---
     if mapa_output['last_object_clicked']:
