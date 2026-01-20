@@ -12,7 +12,7 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="GeoAlerta Antioquia", page_icon="🏔️", layout="wide")
 
 # 👇 ¡CAMBIA ESTO POR TU USUARIO REAL DE GITHUB!
-URL_PUNTOS = "https://raw.githubusercontent.com/TU_USUARIO/geoalerta-sat/main/puntos_monitoreo.csv"
+URL_PUNTOS = "https://raw.githubusercontent.com/giox28/geoalerta-sat/main/puntos_monitoreo.csv"
 
 # --- 1. CARGA DE PUNTOS ESTRUCTURALES ---
 @st.cache_data(ttl=3600)
